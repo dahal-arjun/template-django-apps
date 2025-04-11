@@ -5,7 +5,6 @@ from .models import TaskResult
 
 @shared_task
 def add_numbers(x, y):
-    # Simulate a time-consuming task
     time.sleep(5)
     result = x + y
     return result

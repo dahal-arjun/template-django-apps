@@ -24,7 +24,7 @@
 
 <script>
 function triggerTask(taskType) {
-    fetch(`/demo/trigger/${taskType}/`)
+    fetch(`/trigger/${taskType}/`)
         .then(response => response.json())
         .then(data => {
             const resultDiv = document.createElement('div');
@@ -45,7 +45,7 @@ function triggerTask(taskType) {
 
 function pollTaskStatus(taskId) {
     const interval = setInterval(() => {
-        fetch(`/demo/status/${taskId}/`)
+        fetch(`/status/${taskId}/`)
             .then(response => response.json())
             .then(data => {
                 document.getElementById(`status-${taskId}`).textContent = `Status: ${data.state}`;

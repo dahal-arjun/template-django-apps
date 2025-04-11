@@ -21,7 +21,8 @@ services:
   postgres:
     image: postgres:13-alpine
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data/
+      - ../../docker/dev/init-scripts:/docker-entrypoint-initdb.d/
     environment:
       - POSTGRES_DB=django_db
       - POSTGRES_USER=postgres
@@ -33,7 +34,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
   redis:
     image: redis:alpine
     ports:

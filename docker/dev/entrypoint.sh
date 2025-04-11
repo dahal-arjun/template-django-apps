@@ -18,9 +18,11 @@ cd /app/backend
 mkdir -p staticfiles mediafiles
 chmod -R 755 staticfiles mediafiles
 
-# Apply database migrations
-python manage.py migrate
-python manage.py migrate  --noinput
+# First migrate django_celery_beat specifically
+python manage.py migrate django_celery_beat --noinput
+
+# Then run remaining migrations
+python manage.py migrate --noinput
 
 # Start development server
 python manage.py runserver 0.0.0.0:8000
