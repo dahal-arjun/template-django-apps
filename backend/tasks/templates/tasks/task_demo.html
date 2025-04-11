@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Celery Task Demo</h2>
+    
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <button class="btn btn-primary" onclick="triggerTask('add')">Add Numbers</button>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-success" onclick="triggerTask('text')">Process Text</button>
+        </div>
+        <div class="col-md-4">
+            <button class="btn btn-warning" onclick="triggerTask('long')">Long Running Task</button>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <h4>Task Results:</h4>
+        <div id="results" class="mt-3"></div>
+    </div>
+</div>
+
+<script>
+function triggerTask(taskType) {
+    fetch(`/demo/trigger/${taskType}/`)
+        .then(response => response.json())
+        .then(data => {
+            const resultDiv = document.createElement('div');
+            resultDiv.innerHTML = `
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Task ID: ${data.task_id}</h5>
+                        <p class="card-text">Type: ${data.task_type}</p>
+                        <p class="card-text" id="status-${data.task_id}">Status: PENDING</p>
+                        <p class="card-text" id="result-${data.task_id}"></p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('results').prepend(resultDiv);
+            pollTaskStatus(data.task_id);
+        });
+}
+
+function pollTaskStatus(taskId) {
+    const interval = setInterval(() => {
+        fetch(`/demo/status/${taskId}/`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById(`status-${taskId}`).textContent = `Status: ${data.state}`;
+                
+                if (data.state === 'SUCCESS') {
+                    document.getElementById(`result-${taskId}`).textContent = `Result: ${data.result}`;
+                    clearInterval(interval);
+                } else if (data.state === 'PROGRESS') {
+                    document.getElementById(`result-${taskId}`).textContent = 
+                        `Progress: ${data.progress.current} of ${data.progress.total}`;
+                }
+            });
+    }, 1000);
+}
+</script>
+{% endblock %}
