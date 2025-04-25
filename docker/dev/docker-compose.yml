@@ -47,8 +47,8 @@ services:
     volumes:
       - ../../:/app
     environment:
-      - DJANGO_ENV={DJANGO_ENV}
-      - DJANGO_SETTINGS_MODULE={DJANGO_SETTINGS_MODULE}
+      - DJANGO_ENV=${DJANGO_ENV}
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
     env_file:
       - .env
     depends_on:
@@ -67,8 +67,8 @@ services:
     volumes:
       - ../../:/app
     environment:
-      - DJANGO_ENV={DJANGO_ENV}
-      - DJANGO_SETTINGS_MODULE={DJANGO_SETTINGS_MODULE}
+      - DJANGO_ENV=${DJANGO_ENV}
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
     env_file:
       - .env
     depends_on:
@@ -88,8 +88,8 @@ services:
     volumes:
       - ../../:/app
     environment:
-      - DJANGO_ENV={DJANGO_ENV}
-      - DJANGO_SETTINGS_MODULE={DJANGO_SETTINGS_MODULE}
+      - DJANGO_ENV=${DJANGO_ENV}
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
     env_file:
       - .env
     depends_on:
