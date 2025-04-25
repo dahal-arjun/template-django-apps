@@ -19,14 +19,14 @@ services:
         condition: service_started
 
   postgres:
-    image: postgres:13-alpine
+    image: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data/
       - ../../docker/dev/init-scripts:/docker-entrypoint-initdb.d/
     environment:
-      - POSTGRES_DB=django_db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=django_password
+      - POSTGRES_DB={POSTGRES_DB}
+      - POSTGRES_USER={POSTGRES_USER}
+      - POSTGRES_PASSWORD={POSTGRES_PASSWORD}
     ports:
       - "5432:5432"
     healthcheck:
@@ -47,8 +47,8 @@ services:
     volumes:
       - ../../:/app
     environment:
-      - DJANGO_ENV=development
-      - DJANGO_SETTINGS_MODULE=core.settings.development
+      - DJANGO_ENV={DJANGO_ENV}
+      - DJANGO_SETTINGS_MODULE={DJANGO_SETTINGS_MODULE}
     env_file:
       - .env
     depends_on:
@@ -67,8 +67,8 @@ services:
     volumes:
       - ../../:/app
     environment:
-      - DJANGO_ENV=development
-      - DJANGO_SETTINGS_MODULE=core.settings.development
+      - DJANGO_ENV={DJANGO_ENV}
+      - DJANGO_SETTINGS_MODULE={DJANGO_SETTINGS_MODULE}
     env_file:
       - .env
     depends_on:
@@ -88,8 +88,8 @@ services:
     volumes:
       - ../../:/app
     environment:
-      - DJANGO_ENV=development
-      - DJANGO_SETTINGS_MODULE=core.settings.development
+      - DJANGO_ENV={DJANGO_ENV}
+      - DJANGO_SETTINGS_MODULE={DJANGO_SETTINGS_MODULE}
     env_file:
       - .env
     depends_on:
