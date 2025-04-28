@@ -11,8 +11,8 @@ services:
     expose:
       - 8000
     environment:
-      - DJANGO_ENV={DJANGO_ENV}
-      - DJANGO_SETTINGS_MODULE={DJANGO_SETTINGS_MODULE}
+      - DJANGO_ENV=${DJANGO_ENV}
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
     env_file:
       - .env
     depends_on:
@@ -37,9 +37,9 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     environment:
-      - POSTGRES_DB={POSTGRES_DB}
-      - POSTGRES_USER={POSTGRES_USER}
-      - POSTGRES_PASSWORD={POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -59,8 +59,8 @@ services:
     volumes:
       - ../../:/app
     environment:
-      - DJANGO_ENV={DJANGO_ENV}
-      - DJANGO_SETTINGS_MODULE={DJANGO_SETTINGS_MODULE}
+      - DJANGO_ENV=${DJANGO_ENV}
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
     env_file:
       - .env
     depends_on:
@@ -79,8 +79,8 @@ services:
     volumes:
       - ../../:/app
     environment:
-      - DJANGO_ENV=production
-      - DJANGO_SETTINGS_MODULE=core.settings.production
+      - DJANGO_ENV=${DJANGO_ENV}
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
     env_file:
       - .env
     depends_on:
@@ -101,8 +101,8 @@ services:
     volumes:
       - ../../:/app
     environment:
-      - DJANGO_ENV={DJANGO_ENV}
-      - DJANGO_SETTINGS_MODULE={DJANGO_SETTINGS_MODULE}
+      - DJANGO_ENV=${DJANGO_ENV}
+      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
     env_file:
       - .env
     depends_on:

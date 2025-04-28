@@ -3,11 +3,9 @@ from .base import *
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-')
 DEBUG = True
-ALLOWED_HOSTS = ["127.0.0.1","localhost","0.0.0.0","localhost:3000", ""]
-CORS_ALLOWED_ORIGINS = ["http://localhost:3000", "https://dev.sekurah.com" ]
-# Development-specific settings
-CELERY_BROKER_URL = 'redis://redis:6379/0'
-CELERY_RESULT_BACKEND = 'redis://redis:6379/0'
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
+CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', '').split(',')
+
 
 # Debug Toolbar settings
 INSTALLED_APPS += [
