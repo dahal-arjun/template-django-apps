@@ -14,7 +14,7 @@ def get_env_variable(var_name, default=None):
         raise ImproperlyConfigured(error_msg)
 
 # SECURITY SETTINGS
-DEBUG = os.getenv('DJANGO_DEBUG', 'False') == 'True'
+DEBUG = False
 SECRET_KEY = get_env_variable('DJANGO_SECRET_KEY', 'temporary-key-for-build')
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(',')
 
@@ -28,18 +28,6 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 X_FRAME_OPTIONS = 'DENY'
 SECURE_CONTENT_TYPE_NOSNIFF = True
-
-# REDIS SETTINGS
-REDIS_HOST = os.getenv('REDIS_HOST', 'redis')
-REDIS_PORT = os.getenv('REDIS_PORT', '6379')
-REDIS_DB = os.getenv('REDIS_DB', '0')
-
-# CELERY SETTINGS
-CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}')
-CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', CELERY_BROKER_URL)
-CELERY_TASK_ALWAYS_EAGER = False
-CELERY_TASK_TIME_LIMIT = 5 * 60
-CELERY_TASK_SOFT_TIME_LIMIT = 60
 
 # STATIC & MEDIA SETTINGS
 STATIC_ROOT = BASE_DIR / 'staticfiles'
