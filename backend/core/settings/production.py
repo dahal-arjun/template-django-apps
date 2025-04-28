@@ -3,20 +3,10 @@ from .base import *
 from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
 
-def get_env_variable(var_name, default=None):
-    """Get the environment variable or return default/exception."""
-    try:
-        return os.environ[var_name]
-    except KeyError:
-        if default is not None:
-            return default
-        error_msg = f"Set the {var_name} environment variable"
-        raise ImproperlyConfigured(error_msg)
-
 # SECURITY SETTINGS
 DEBUG = False
-SECRET_KEY = get_env_variable('DJANGO_SECRET_KEY', 'temporary-key-for-build')
-ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', '*').split(',')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS').split(',')
 
 # CORS & SECURITY HEADERS
 SECURE_SSL_REDIRECT = True
@@ -53,15 +43,4 @@ LOGGING = {
         'handlers': ['console'],
         'level': 'INFO',
     },
-}
-
-# Cache settings
-CACHES = {
-    'default': {
-        'BACKEND': 'django_redis.cache.RedisCache',
-        'LOCATION': CELERY_BROKER_URL,
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        }
-    }
 }
