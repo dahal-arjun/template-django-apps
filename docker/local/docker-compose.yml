@@ -9,7 +9,7 @@ services:
       - static_volume:/app/backend/staticfiles
       - media_volume:/app/backend/mediafiles
     ports:
-      - "8000:8000"
+      - "8060:8000"
     env_file:
       - .env
     depends_on:
@@ -33,7 +33,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     ports:
-      - "5432:5432"
+      - "5460:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
@@ -46,7 +46,7 @@ services:
     volumes:
       - redis_data:/data
     ports:
-      - "6379:6379"
+      - "6360:6379"
     restart: unless-stopped
     command: redis-server --appendonly yes
 
@@ -106,7 +106,7 @@ services:
       dockerfile: docker/local/Dockerfile.back
     command: celery -A core flower
     ports:
-      - "5555:5555"
+      - "5560:5555"
     volumes:
       - ../../:/app
     environment:
@@ -129,11 +129,11 @@ services:
       context: ../../
       dockerfile: docker/local/Dockerfile.front
       args:
-        NEXT_PUBLIC_BASE_URL: http://localhost:8000/api
+        NEXT_PUBLIC_BASE_URL: http://localhost:8060/api
     environment:
       - NODE_ENV=development
     ports:
-      - "3000:3000"
+      - "3060:3000"
     env_file:
       - .env
     volumes:
@@ -142,7 +142,7 @@ services:
     depends_on:
       - web
     restart: unless-stopped
-    command: npm run dev
+    command: sh -c "npm install && npx next dev"
 
 volumes:
   postgres_data:

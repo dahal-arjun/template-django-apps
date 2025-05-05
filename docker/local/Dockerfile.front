@@ -9,27 +9,28 @@ ENV WATCHPACK_POLLING=true
 
 # Declare build arguments for env variables
 ARG NEXT_PUBLIC_BASE_URL
-ARG NEXT_PUBLIC_WEBHOOK_API_URL
 
 # Set environment variables
 ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
-ENV NEXT_PUBLIC_WEBHOOK_API_URL=${NEXT_PUBLIC_WEBHOOK_API_URL}
 
 # Install dependencies
 RUN apk add --no-cache libc6-compat git
 
 WORKDIR /app
 
-# We won't copy package files here - they'll be mounted
-# from the host for development
+# Copy package files first to leverage Docker cache
+COPY frontend/package*.json ./
 
-# Setup for development - no need to copy files as they will be mounted
-# Just set up the proper command
+# Install dependencies
+RUN npm ci
+
+# Copy the rest of the app (in development this will be overridden by volume mounts)
+COPY frontend/ ./
 
 EXPOSE 3000
 
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Start Next.js in development mode with polling for HMR
-CMD ["sh", "-c", "npm install && npm run dev"]
+# Use npx to ensure we're using the project's next binary
+CMD ["sh", "-c", "npm install && npx next dev"]

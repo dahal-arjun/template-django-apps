@@ -14,32 +14,14 @@ class StatusChoices(models.TextChoices):
     INACTIVE = 'inactive', 'Inactive'
     SUSPENDED = 'suspended', 'Suspended'
 
-class PaymentStatusChoices(models.TextChoices):
-    PAID = 'paid', 'Paid'
-    PENDING = 'pending', 'Pending'
-    FAILED = 'failed', 'Failed'
-
 class Tenant(TenantMixin):
     name = models.CharField(max_length=100, unique=True)
-    website = models.CharField(max_length=200, unique=True, blank=True, null=True)
     admin_email = models.EmailField()
     # logo = models.FileField(upload_to='logos/', null=True, blank=True)
-    paid_until = models.DateField()
-    on_trial = models.BooleanField()
-    created_on = models.DateField(auto_now_add=True)
-    subscription_plan = models.CharField(max_length=100, blank=True, null=True)
-    billing_address = models.TextField(blank=True, null=True)
-    contact_phone = models.CharField(max_length=15, blank=True, null=True)
-    contact_address = models.TextField(blank=True, null=True)
     tenant_status = models.CharField(
         max_length=20,
         choices=StatusChoices.choices,
         default=StatusChoices.ACTIVE
-    )
-    payment_status = models.CharField(
-        max_length=20,
-        choices=PaymentStatusChoices.choices,
-        default=PaymentStatusChoices.PENDING
     )
     settings = models.JSONField(blank=True, null=True)
     last_updated = models.DateTimeField(auto_now=True)
