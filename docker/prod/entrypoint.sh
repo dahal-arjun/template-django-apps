@@ -8,7 +8,8 @@ done
 
 # Apply migrations and collect static files
 cd /app/backend
-python manage.py migrate
+python manage.py migrate django_celery_beat --noinput
+python manage.py migrate --noinput
 python manage.py collectstatic --noinput
 
 # Start gunicorn

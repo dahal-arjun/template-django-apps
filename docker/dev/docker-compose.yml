@@ -2,10 +2,9 @@ services:
   web:
     build:
       context: ../../
-      dockerfile: docker/dev/Dockerfile
+      dockerfile: docker/dev/Dockerfile.back
     command: /entrypoint.sh
     volumes:
-      - ../../:/app
       - static_volume:/app/backend/staticfiles
       - media_volume:/app/backend/mediafiles
     ports:
@@ -17,9 +16,10 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    restart: always
 
   postgres:
-    image: postgres
+    image: postgres:13-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
       - ../../docker/dev/init-scripts:/docker-entrypoint-initdb.d/
@@ -30,22 +30,29 @@ services:
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: always
+
   redis:
     image: redis:alpine
+    volumes:
+      - redis_data:/data
     ports:
       - "6379:6379"
+    restart: always
+    command: redis-server --appendonly yes
 
   celery_worker:
     build:
       context: ../../
-      dockerfile: docker/dev/Dockerfile
+      dockerfile: docker/dev/Dockerfile.back
     command: celery -A core worker -l info
     volumes:
-      - ../../:/app
+      - static_volume:/app/backend/staticfiles
+      - media_volume:/app/backend/mediafiles
     environment:
       - DJANGO_ENV=${DJANGO_ENV}
       - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
@@ -58,17 +65,18 @@ services:
         condition: service_started
       web:
         condition: service_started
+    restart: always
 
   celery_beat:
     build:
       context: ../../
-      dockerfile: docker/dev/Dockerfile
+      dockerfile: docker/dev/Dockerfile.back
     command: celery -A core beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     volumes:
       - ../../:/app
     environment:
-      - DJANGO_ENV=${DJANGO_ENV}
-      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
+      - DJANGO_ENV=production
+      - DJANGO_SETTINGS_MODULE=core.settings.production
     env_file:
       - .env
     depends_on:
@@ -78,10 +86,12 @@ services:
         condition: service_started
       web:
         condition: service_started
+    restart: always
+
   flower:
     build:
       context: ../../
-      dockerfile: docker/dev/Dockerfile
+      dockerfile: docker/dev/Dockerfile.back
     command: celery -A core flower
     ports:
       - "5555:5555"
@@ -99,9 +109,27 @@ services:
         condition: service_started
       web:
         condition: service_started
+    restart: always
 
-# At the bottom of the file
+      
+  frontend:
+      build:
+        context: ../../
+        dockerfile: docker/dev/Dockerfile.front
+        args:
+          NEXT_PUBLIC_BASE_URL: https://dev.example.com/api
+      environment:
+        - NODE_ENV=production
+      ports:
+        - "3000:3000"
+      env_file:
+        - .env
+      depends_on:
+        - web
+      restart: always
+
 volumes:
   postgres_data:
+  redis_data:
   static_volume:
   media_volume:

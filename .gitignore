@@ -1,6 +1,7 @@
 # Environment
 .env
 .env.*
+!.env.n8n
 !.env.example
 
 # Python
@@ -42,3 +43,4 @@ celerybeat.pid
 .vscode/
 *.swp
 *.swo
+/backend/sekurah_data

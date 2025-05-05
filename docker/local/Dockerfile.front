@@ -1,0 +1,35 @@
+# syntax=docker.io/docker/dockerfile:1
+
+FROM node:18-alpine
+
+# Development-friendly settings
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV WATCHPACK_POLLING=true
+
+# Declare build arguments for env variables
+ARG NEXT_PUBLIC_BASE_URL
+ARG NEXT_PUBLIC_WEBHOOK_API_URL
+
+# Set environment variables
+ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
+ENV NEXT_PUBLIC_WEBHOOK_API_URL=${NEXT_PUBLIC_WEBHOOK_API_URL}
+
+# Install dependencies
+RUN apk add --no-cache libc6-compat git
+
+WORKDIR /app
+
+# We won't copy package files here - they'll be mounted
+# from the host for development
+
+# Setup for development - no need to copy files as they will be mounted
+# Just set up the proper command
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV HOSTNAME="0.0.0.0"
+
+# Start Next.js in development mode with polling for HMR
+CMD ["sh", "-c", "npm install && npm run dev"]

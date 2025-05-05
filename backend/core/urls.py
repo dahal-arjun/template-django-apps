@@ -6,3 +6,8 @@ urlpatterns = [
     path('', include('core.urls_public')),
     path('api/permissions/', include('tenant_permissions.urls')),
 ]
+
+if settings.DEBUG:
+    urlpatterns += [
+        path('__debug__/', include('debug_toolbar.urls')),
+    ]

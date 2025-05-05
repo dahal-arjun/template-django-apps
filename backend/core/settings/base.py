@@ -3,7 +3,7 @@ import os
 from datetime import timedelta
 from corsheaders.defaults import default_headers
 from celery import shared_task
-from celery.schedules import crontab
+from celery.schedules import crontab  # Add this import
 from core.celery import app
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -17,22 +17,22 @@ DATABASE_ROUTERS = ("django_tenants.routers.TenantSyncRouter",)
 DATABASES = {
     'default': {
         "ENGINE": "django_tenants.postgresql_backend",
-        'NAME': os.environ.get('POSTGRES_DB', 'django_db'),
-        'USER': os.environ.get('POSTGRES_USER', 'django_user'),
-        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'django_password'),
-        'HOST': os.environ.get('POSTGRES_HOST', 'postgres'),
-        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
+        'NAME': os.environ.get('POSTGRES_DB'),
+        'USER': os.environ.get('POSTGRES_USER'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD'),
+        'HOST': os.environ.get('POSTGRES_HOST'),
+        'PORT': os.environ.get('POSTGRES_PORT'),
     }
 }
 
 # Redis Configuration
-REDIS_HOST = os.environ.get('REDIS_HOST', 'redis')
-REDIS_PORT = os.environ.get('REDIS_PORT', '6379')
-REDIS_DB = os.environ.get('REDIS_DB', '0')
+REDIS_HOST = os.environ.get('REDIS_HOST')
+REDIS_PORT = os.environ.get('REDIS_PORT')
+REDIS_DB = os.environ.get('REDIS_DB')
 
 # Celery Configuration
-CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', f'redis://{REDIS_HOST}:{REDIS_PORT}/{REDIS_DB}')
-CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND', CELERY_BROKER_URL)
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -66,7 +66,7 @@ SHARED_APPS = (
     "django.contrib.messages",
     "corsheaders",
     'django_celery_beat',
-    'tasks'
+    'tasks',
 
 )
 
@@ -141,10 +141,8 @@ SPECTACULAR_SETTINGS = {
 
 
 WSGI_APPLICATION = 'core.wsgi.application'
-TENANT_MODEL = "sekurah_tenants.Tenant"
-TENANT_DOMAIN_MODEL = "sekurah_tenants.Domain"
-PUBLIC_SCHEMA_URLCONF = "core.urls_public"
-SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
+
+
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -167,11 +165,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'mediafiles'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -194,11 +187,17 @@ SHOW_PUBLIC_IF_NO_TENANT_FOUND = True
 CORS_ALLOW_HEADERS = (
     *default_headers,
     "X-Tenant-ID",
+    "Authorization",
+    "Content-Type",
 )
 
-# app.conf.beat_schedule = {
-#     # "fetch-all-rss": {
-#     #     "task": "encyclopedia.tasks.fetch_all_rss_feeds",
-#     #     "schedule": crontab(minute="*/30"),
-#     # }
-# }
+# Add this to expose header to frontend
+CORS_EXPOSE_HEADERS = ["Content-Type", "X-Tenant-ID"]
+
+# Remove the tenant_schemas field from the beat schedule
+app.conf.beat_schedule = {
+    "fetch-all-rss": {
+        "task": "encyclopedia.tasks.fetch_all_rss_feeds",
+        "schedule": crontab(minute="*/30"),
+    }
+}

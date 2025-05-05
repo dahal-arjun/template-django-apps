@@ -2,9 +2,10 @@ services:
   web:
     build:
       context: ../../
-      dockerfile: docker/prod/Dockerfile.back
+      dockerfile: docker/local/Dockerfile.back
     command: /entrypoint.sh
     volumes:
+      - ../../:/app
       - static_volume:/app/backend/staticfiles
       - media_volume:/app/backend/mediafiles
     ports:
@@ -16,13 +17,17 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    restart: always
+    restart: unless-stopped
+    environment:
+      - DJANGO_DEBUG=True
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
 
   postgres:
     image: postgres:13-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
-      - ../../docker/prod/init-scripts:/docker-entrypoint-initdb.d/
+      - ../../docker/local/init-scripts:/docker-entrypoint-initdb.d/
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
@@ -34,7 +39,7 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    restart: always
+    restart: unless-stopped
 
   redis:
     image: redis:alpine
@@ -42,20 +47,24 @@ services:
       - redis_data:/data
     ports:
       - "6379:6379"
-    restart: always
+    restart: unless-stopped
     command: redis-server --appendonly yes
 
   celery_worker:
     build:
       context: ../../
-      dockerfile: docker/prod/Dockerfile.back
-    command: celery -A core worker -l info
+      dockerfile: docker/local/Dockerfile.back
+    command: celery -A core worker -l debug
     volumes:
+      - ../../:/app
       - static_volume:/app/backend/staticfiles
       - media_volume:/app/backend/mediafiles
     environment:
-      - DJANGO_ENV=${DJANGO_ENV}
-      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
+      - DJANGO_ENV=development
+      - DJANGO_SETTINGS_MODULE=core.settings.development
+      - DJANGO_DEBUG=True
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
     env_file:
       - .env
     depends_on:
@@ -65,18 +74,21 @@ services:
         condition: service_started
       web:
         condition: service_started
-    restart: always
+    restart: unless-stopped
 
   celery_beat:
     build:
       context: ../../
-      dockerfile: docker/prod/Dockerfile.back
-    command: celery -A core beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+      dockerfile: docker/local/Dockerfile.back
+    command: celery -A core beat -l debug --scheduler django_celery_beat.schedulers:DatabaseScheduler
     volumes:
       - ../../:/app
     environment:
-      - DJANGO_ENV=production
-      - DJANGO_SETTINGS_MODULE=core.settings.production
+      - DJANGO_ENV=development
+      - DJANGO_SETTINGS_MODULE=core.settings.development
+      - DJANGO_DEBUG=True
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
     env_file:
       - .env
     depends_on:
@@ -86,20 +98,21 @@ services:
         condition: service_started
       web:
         condition: service_started
-    restart: always
+    restart: unless-stopped
 
   flower:
     build:
       context: ../../
-      dockerfile: docker/prod/Dockerfile.back
+      dockerfile: docker/local/Dockerfile.back
     command: celery -A core flower
     ports:
       - "5555:5555"
     volumes:
       - ../../:/app
     environment:
-      - DJANGO_ENV=${DJANGO_ENV}
-      - DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
+      - DJANGO_ENV=development
+      - DJANGO_SETTINGS_MODULE=core.settings.development
+      - DJANGO_DEBUG=True
     env_file:
       - .env
     depends_on:
@@ -109,23 +122,27 @@ services:
         condition: service_started
       web:
         condition: service_started
-    restart: always
+    restart: unless-stopped
       
   frontend:
-      build:
-        context: ../../
-        dockerfile: docker/prod/Dockerfile.front
-        args:
-          NEXT_PUBLIC_BASE_URL: https://prod.example.com/api
-      environment:
-        - NODE_ENV=production
-      ports:
-        - "3000:3000"
-      env_file:
-        - .env
-      depends_on:
-        - web
-      restart: always
+    build:
+      context: ../../
+      dockerfile: docker/local/Dockerfile.front
+      args:
+        NEXT_PUBLIC_BASE_URL: http://localhost:8000/api
+    environment:
+      - NODE_ENV=development
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - ../../frontend:/app
+      - /app/node_modules
+    depends_on:
+      - web
+    restart: unless-stopped
+    command: npm run dev
 
 volumes:
   postgres_data:

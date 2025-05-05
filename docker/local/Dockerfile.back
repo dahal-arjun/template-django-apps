@@ -1,0 +1,54 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install system dependencies including debugging tools
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    netcat-traditional \
+    postgresql-client \
+    curl \
+    git \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Python dependencies including development packages
+COPY requirements/base.txt requirements/base.txt
+# Try to copy development requirements if they exist (will be ignored if file doesn't exist)
+RUN if [ -f /app/requirements/development.txt ]; then echo "Using existing development.txt"; else echo "# Development requirements" > /app/requirements/development.txt; fi
+RUN pip install --no-cache-dir -r requirements/base.txt
+# Try to install development dependencies if available, otherwise just use base
+RUN if [ -s requirements/development.txt ]; then \
+        pip install --no-cache-dir -r requirements/development.txt; \
+    else \
+        echo "No development requirements found, using base only"; \
+    fi
+
+# Install additional development tools
+RUN pip install --no-cache-dir ipython ipdb django-extensions
+
+# Set environment variables for development
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app/backend
+ENV DJANGO_SETTINGS_MODULE=core.settings.development
+ENV DJANGO_ENV=development
+ENV DEBUG=True
+
+# Create necessary directories
+RUN mkdir -p /app/backend/staticfiles /app/backend/mediafiles \
+    && chmod -R 755 /app/backend/staticfiles /app/backend/mediafiles
+
+# Copy entrypoint script first and set permissions
+COPY docker/local/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+# We don't copy the project files here as they will be mounted as a volume
+# for development to enable hot reloading
+
+WORKDIR /app/backend
+
+EXPOSE 8000
+
+# Use Django's built-in development server instead of gunicorn for local development
+CMD ["/entrypoint.sh"]

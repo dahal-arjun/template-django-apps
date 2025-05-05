@@ -4,7 +4,8 @@ attrs
 billiard
 celery
 certifi
-# Removed boto3 and botocore
+boto3<1.26.0
+botocore<1.29.0
 charset-normalizer
 click
 click-didyoumean
@@ -13,7 +14,6 @@ click-repl
 Django
 django-cors-headers
 django-filter
-# Removed django-storages (AWS-related)
 django-tenants
 djangorestframework
 djangorestframework-simplejwt
@@ -67,3 +67,4 @@ psycopg2-binary
 django-redis
 python-dotenv
 django-debug-toolbar
+django-storages

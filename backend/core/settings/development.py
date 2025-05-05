@@ -12,7 +12,7 @@ INSTALLED_APPS += [
     'debug_toolbar',
 ]
 
-MIDDLEWARE = ['debug_toolbar.middleware.DebugToolbarMiddleware'] + MIDDLEWARE
+MIDDLEWARE +=  ['debug_toolbar.middleware.DebugToolbarMiddleware'] 
 
 
 # Debug toolbar configuration
@@ -24,3 +24,11 @@ INTERNAL_IPS = [
 import socket
 hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
 INTERNAL_IPS += [ip[:-1] + '1' for ip in ips]
+
+
+# Static and media files
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'mediafiles')
